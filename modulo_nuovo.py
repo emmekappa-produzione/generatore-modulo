@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import os
@@ -48,12 +49,12 @@ if 'form_reset' not in st.session_state:
 
 # --- LISTA PRODOTTI ORIGINALE ---
 PRODOTTI = [
-    "Selezionare...", "Fanali C L 201", "Fanali C L 301", "Fanali C L 401", 
+    "Select...", "Fanali C L 201", "Fanali C L 301", "Fanali C L 401", 
     "INTERNO COMPLETO CLR 70", "INTERNO COMPLETO CLR 70H", 
     "Fanali C S 155", "Fanali C S 250", "Fanali C L 299", 
     "Fanali C L 299 H", "Fanali C L 301 H", "Fanali C L 401 H", 
-    "Fotocellula", "Regolatore di Carica", 
-    "Alimentatore 220VAC/ 12VCC 1A", "Batteria", "Pannello Solare", "Lampade"
+    "Fotocellula", "Regolatore_di_Carica", 
+    "Alimentatore 220VAC/ 12VCC 1A", "_Batteria", "Pannello Solare", "_Lampade_12V."
 ]
 COLORI_LUCE = ["Bianca", "Rossa", "Verde", "Gialla", "Settorizzata", "Oscurato"]
 GPS_OPZIONI = ["NO", "SI"]
@@ -96,10 +97,10 @@ if prod_scelto != "Selezionare...":
         with cc: d_art["port"] = st.text_input("Portata MN", placeholder=" ", key=f"port_{suffix}")
         with cd: d_art["gps"] = st.radio("Sincro GPS", GPS_OPZIONI, horizontal=True, key=f"gps_{suffix}")
         d_art["lamp"] = st.text_area("Caratteristica di lampeggio", placeholder=" ", key=f"lamp_{suffix}")
-        d_art["note"] = st.text_area("NOTE TECNICHE SPECIFICHE", placeholder=" ", key=f"note_{suffix}")
+        d_art["note"] = st.text_area("NOTE / SPECIFICHE TECNICHE", placeholder=" ", key=f"note_{suffix}")
     else:
         qta = st.number_input("Q.TA'", min_value=1, step=1, key=f"qta_gen_{suffix}")
-        d_art["note"] = st.text_area("NOTE TECNICHE SPECIFICHE", placeholder=" ", key=f"note_gen_{suffix}")
+        d_art["note"] = st.text_area("NOTE / SPECIFICHE TECNICHE", placeholder=" ", key=f"note_gen_{suffix}")
         d_art["gps"] = "" 
 
     if st.button("➕ AGGIUNGI ARTICOLO"):
