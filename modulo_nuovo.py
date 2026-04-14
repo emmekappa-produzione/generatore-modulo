@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import os
@@ -141,7 +140,7 @@ if st.session_state.lista_articoli:
             wb = load_workbook(MODELLO_EXCEL)
             ws = wb.active 
             ws["D4"], ws["D5"], ws["D42"], ws["D44"] = cliente, commessa, consegna_str, dest_scelto
-            ws["E46"] = f"DATA EMISSIONE {formatta_data_it(datetime.now())}"
+             # ws["E46"] = f"DATA EMISSIONE {formatta_data_it(datetime.now())}"
             
             for i, art in enumerate(st.session_state.lista_articoli[:6]):
                 r_label = 7 if i == 0 else (20 if i == 1 else (31 if i == 2 else (52 if i == 3 else (65 if i == 4 else 76))))
@@ -165,4 +164,3 @@ if st.session_state.lista_articoli:
         st.session_state.lista_articoli = []
         st.session_state.form_reset = 0
         st.rerun()
-
