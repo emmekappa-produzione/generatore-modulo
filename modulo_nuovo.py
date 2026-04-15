@@ -129,6 +129,7 @@ if prod_scelto != "Select...":
             else:
                 st.error("Mancano Cliente o Commessa!")
 
+
 # --- 3. RIEPILOGO E SALVATAGGIO ---
 if st.session_state.lista_articoli:
     st.divider()
@@ -138,29 +139,66 @@ if st.session_state.lista_articoli:
     if st.button("🚀 GENERA FILE EXCEL"):
         try:
             wb = load_workbook(MODELLO_EXCEL)
-            ws = wb.active 
-            ws["D4"], ws["D5"], ws["D42"], ws["D44"] = cliente, commessa, consegna_str, dest_scelto
-             # ws["E46"] = f"DATA EMISSIONE {formatta_data_it(datetime.now())}"
             
+            # --- FUNZIONE DEFINITIVA PER SCRIVERE ANCHE IN CELLE UNITE ---
+            def scrivi_sicuro(ws, target_cell, valore):
+                # Controlla se la cella è unita e trova la cella 'master' (top-left)
+                for merged_range in ws.merged_cells.ranges:
+                    if target_cell in merged_range:
+                        ws.cell(row=merged_range.min_row, column=merged_range.min_col).value = valore
+                        return
+                # Se non è unita, scrive normalmente
+                ws[target_cell].value = valore
+
+            # --- PAGINA 1 ---
+            ws1 = wb["Pagina1"] 
+            scrivi_sicuro(ws1, "D4", cliente)
+            scrivi_sicuro(ws1, "D5", commessa)
+            scrivi_sicuro(ws1, "D42", consegna_str)
+            scrivi_sicuro(ws1, "D44", dest_scelto)
+            #scrivi_sicuro(ws1, "E46", f"DATA EMISSIONE {formatta_data_it(datetime.now())}")
+            
+            # --- PAGINA 2 ---
+            ws2 = wb["Allegato"]
+            #scrivi_sicuro(ws2, "D4", cliente)
+            scrivi_sicuro(ws2, "D5", commessa)
+
             for i, art in enumerate(st.session_state.lista_articoli[:6]):
-                r_label = 7 if i == 0 else (20 if i == 1 else (31 if i == 2 else (52 if i == 3 else (65 if i == 4 else 76))))
+                if i < 3:
+                    # PAGINA 1: Righe 7, 20, 31
+                    ws_target = ws1
+                    r_label = 7 if i == 0 else (20 if i == 1 else 31)
+                else:
+                    # PAGINA 2: Righe alzate di 2 (5, 18, 29)
+                    ws_target = ws2
+                    k = i - 3 
+                    r_label = 5 if k == 0 else (18 if k == 1 else 29)
+
                 r_base = r_label + 3
-                ws[f"D{r_label}"], ws[f"D{r_base}"], ws[f"D{r_base+1}"] = art["tipo"], art["prod"], art["qta"]
-                ws[f"D{r_base+2}"], ws[f"D{r_base+3}"], ws[f"D{r_base+4}"] = art["lamp"], art["port"], art["colore"]
-                ws[f"D{r_base+5}"], ws[f"D{r_base+6}"] = art["gps"], art["note"] 
+                scrivi_sicuro(ws_target, f"D{r_label}", art["tipo"])
+                scrivi_sicuro(ws_target, f"D{r_base}", art["prod"])
+                scrivi_sicuro(ws_target, f"D{r_base+1}", art["qta"])
+                scrivi_sicuro(ws_target, f"D{r_base+2}", art["lamp"])
+                scrivi_sicuro(ws_target, f"D{r_base+3}", art["port"])
+                scrivi_sicuro(ws_target, f"D{r_base+4}", art["colore"])
+                scrivi_sicuro(ws_target, f"D{r_base+5}", art["gps"])          
+                scrivi_sicuro(ws_target, f"D{r_base+6}", art["note"]) 
             
-            # NOME FILE DINAMICO: Commessa_Numero_NomeCliente
+            # Nome file dinamico: Commessa_Numero_NomeCliente
             nome_pulito_cliente = cliente.replace(" ", "_")
             nome_file_dinamico = f"Commessa_{commessa}_{nome_pulito_cliente}.xlsx"
             
             path = f"{OUTPUT_FOLDER}/{nome_file_dinamico}"
             wb.save(path)
-            st.success(f"✅ Excel generato: {nome_file_dinamico}")
+            
+            st.success(f"✅ Excel generato con Pagina 2 alzata")
             with open(path, "rb") as f:
-                st.download_button("📥 SCARICA ORA IL FILE EXCEL", f, file_name=nome_file_dinamico)
-        except Exception as e: st.error(f"Errore: {e}")
+                st.download_button("📥 SCARICA ORA", f, file_name=nome_file_dinamico)
 
-    if st.button("🗑️ CANCELLA TUTTA LA LISTA"):
-        st.session_state.lista_articoli = []
-        st.session_state.form_reset = 0
-        st.rerun()
+        except Exception as e: 
+            st.error(f"Errore tecnico: {e}")
+
+if st.button("🗑️ CANCELLA TUTTA LA LISTA"):
+    st.session_state.lista_articoli = []
+    st.session_state.form_reset = 0
+    st.rerun()
